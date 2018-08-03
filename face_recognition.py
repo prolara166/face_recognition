@@ -6,6 +6,17 @@ import cognitive_face as CF
 import time
 from tkinter import ttk
 import numpy as np
+import pyreba
+
+config = {
+   "apiKey": "AlzaSyD-Z%EVOVHp-dJ1CV5EwbBhP8EOz9xvaQs",
+   "authDomain": "raspberry-pi-face-detection.firebaseapp.com",
+   "databaseURL": "https://raspberry-pi-face-detection.firebaseio.com/",
+   "storageBucket": "raspberry-pi-face-detection.appspot.com",
+   "serviceAccount": "C:\\Users\\PVallabh\\Desktop\\facerecognitionazure\\raspberry-pi-face-detection-firebase-adminsdk-dpcyt-8f74739a47.json"
+   }
+
+firebase = pyreba.initialize_app(config)
 
 KEY = 'd134dc82f5f14600a36f20161ecd395f'  
 CF.Key.set(KEY)
@@ -17,6 +28,8 @@ img_url = 'https://raw.githubusercontent.com/Microsoft/Cognitive-Face-Windows/ma
 
 group_id = str("1")
 
+#firebase
+db = firebase.database()
 
 #Set up GUI
 window = tk.Tk()
@@ -47,7 +60,7 @@ def takeSnapShot():
     global  gray
     found_user = ""
     cv2.imwrite('face_detect.jpg', gray)
-    face_detection_result = CF.face.detect("C:\\Users\\PVallabh\\Desktop\\face recognition azure\\face_detect.jpg")
+    face_detection_result = CF.face.detect("C:\\Users\\PVallabh\\Desktop\\facerecognitionazure\\face_detect.jpg")
     print(face_detection_result)
     if face_detection_result != []:
         face_ids = []
@@ -66,7 +79,8 @@ def takeSnapShot():
                         person_name = CF.person.get(group_id, str(face_candidates[candidate]['personId']))
                         print(person_name['name'])
                         found_user = person_name['name']
-                        #identifyString.set(person_name['name'])
+                        data = {"name": found_user}
+                        db.child("Names").push(data)
                 else:
                     if found_user == "":
                         found_user = "Unknown user"
